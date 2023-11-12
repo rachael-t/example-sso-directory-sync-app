@@ -24,7 +24,7 @@ app.use(
 
 const workos: WorkOS = new WorkOS(process.env.WORKOS_API_KEY)
 const clientID: string = process.env.WORKOS_CLIENT_ID !== undefined ? process.env.WORKOS_CLIENT_ID : ''
-const organizationID: string = ''
+const organizationID: string = 'org_01HF2WMS8KRT7YT2KFRXCBNE6P'
 const redirectURI: string = 'http://localhost:8000/callback'
 const state: string = ''
 
