@@ -1,7 +1,10 @@
-import express, { Application, Request, Response, Router } from 'express'
-import { ProfileAndToken, WorkOS } from '@workos-inc/node'
+import express, { Request, Response, Router } from 'express'
+import { ProfileAndToken, WorkOS, User, Directory, Group } from '@workos-inc/node'
+import { List } from '@workos-inc/node/lib/common/interfaces/list.interface'
+import { Server, Socket } from 'socket.io'
+import morgan from 'morgan'
+import 'dotenv/config'
 
-const app: Application = express()
 const router: Router = express.Router()
 const session: any = require('express-session')
 interface Params {
@@ -12,15 +15,6 @@ interface Params {
   connection?: string;
   organization?: string;
 }
-
-app.use(
-  session({
-    secret: 'keyboard cat',
-    resave: false,
-    saveUninitialized: true,
-    cookie: { secure: true },
-  })
-)
 
 const workos: WorkOS = new WorkOS(process.env.WORKOS_API_KEY)
 const clientID: string = process.env.WORKOS_CLIENT_ID !== undefined ? process.env.WORKOS_CLIENT_ID : ''
@@ -97,6 +91,23 @@ router.get('/logout', async (req: Request, res: Response) => {
   } catch (error) {
     return res.render('error.ejs', { error: error })
   }
+})
+
+process.on('unhandledRejection', (reason, p) => {
+  throw reason
+})
+
+router.get('/users', async (req, res) => {
+  let directoryId: string | undefined
+  if (typeof req.query.id === 'string') {
+      directoryId = req.query.id
+  }
+
+  const users: List<User> = await workos.directorySync.listUsers({
+      directory: directoryId,
+      limit: 100,
+  })
+  res.render('users.ejs', { users: users.data })
 })
 
 export default router
